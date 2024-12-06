@@ -1,0 +1,42 @@
+[project]
+name = "bytechef"
+
+[build]
+  engine = "docker" # Use Dockerfile-based builds
+
+[services]
+  [services.postgres]
+    name = "postgres"
+    image = "postgres:14-alpine"
+    ports = ["5432"]
+    env = {
+      POSTGRES_PASSWORD = "postgres",
+      POSTGRES_USER = "postgres",
+      POSTGRES_DB = "bytechef"
+    }
+    volumes = [
+      {
+        type = "volume",
+        target = "/var/lib/postgresql/data"
+      }
+    ]
+    # Uncomment this section for healthchecks
+    # healthcheck = {
+    #   test = ["CMD", "pg_isready", "-U", "postgres"],
+    #   interval = "10s",
+    #   timeout = "5s",
+    #   retries = 5
+    # }
+
+  [services.bytechef]
+    name = "bytechef"
+    image = "bytechef/bytechef:latest"
+    depends_on = ["postgres"]
+    env = {
+      BYTECHEF_DATASOURCE_URL = "jdbc:postgresql://postgres:5432/bytechef",
+      BYTECHEF_DATASOURCE_USERNAME = "postgres",
+      BYTECHEF_DATASOURCE_PASSWORD = "postgres",
+      BYTECHEF_FEATURE_FLAGS = "",
+      BYTECHEF_SECURITY_REMEMBER_ME_KEY = "e48keep1this1safe3ffb2"
+    }
+    ports = ["8080"]
